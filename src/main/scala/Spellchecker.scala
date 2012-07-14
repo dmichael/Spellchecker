@@ -20,56 +20,53 @@
  *      /    \    \
  *     e      e    a
  *
- *  TODO: Make all structures immutable. Specifically, change ArrayBuffer into List if possible.
- *  TODO: Convert to HashMaps instead of ArrayBuffers! More efficient lookup
+ *  TODO: Make all structures immutable. Specifically, change HashMap if possible.
  */
 
-import collection.mutable.ArrayBuffer
+import collection.mutable.HashMap
+
+// It seems hard to define a self-referencing HashMap without some sort of wrapper
+class Node(val children: HashMap[Char, Node])
+
+object Node {
+    def apply(children: HashMap[Char, Node] = HashMap.empty[Char, Node]) = new Node(children)
+}
 
 object Spellchecker {
-    // We start with null root node ...
-    val dictionary = Node('\0')
+    val dictionary = Node()
 
     def buildDictionary(words: Array[String]) {
-        words.foreach(word => fill(dictionary.children, word))
+        words.foreach(word => fill(dictionary, word))
     }
 
     /**
      * Called recursively to build up a tree representing the dictionary
      */
-    def fill(nodes: ArrayBuffer[Node], letters: String){
-        val (head, tail) = (letters.head, letters.tail)
+    def fill(node: Node, letters: String) {
+        val (letter, tail) = (letters.head, letters.tail)
 
-        // If the node for this letter does not already exist,
-        // create it and add it to the others
-        val node = nodes.find(_.value == head) match {
-            case Some(node) => node
-            case None => {
-                val node = Node(head)
-                (nodes += node).last
-            }
-        }
+        val child = node.children.getOrElseUpdate(letter, Node())
 
-        if(!tail.isEmpty) {
-            fill(node.children, tail)
+        if (!tail.isEmpty) {
+            fill(child, tail)
         }
     }
 }
 
 class Spellchecker {
 
-    def check(word: String): Boolean = exists(Spellchecker.dictionary.children, word.trim)
+    def check(word: String): Boolean = exists(Spellchecker.dictionary, word.trim)
 
     /**
      * Called recursively, walking the tree as nodes are found at each layer looking for matches
      */
-    private def exists(nodes: ArrayBuffer[Node], letters: String): Boolean = {
-        val (head, tail) = (letters.head, letters.tail)
+    private def exists(node: Node, letters: String): Boolean = {
+        val (letter, tail) = (letters.head, letters.tail)
 
-        nodes.find( _.value == head ) match {
-            case Some(node) if !tail.isEmpty => exists(node.children, tail)
+        node.children.get(letter) match {
+            case Some(child) if !tail.isEmpty => exists(child, tail)
             case None => false
-            case _ => true
+            case _ => true // final matching case.. tail is empty (last letter)
         }
     }
 }
