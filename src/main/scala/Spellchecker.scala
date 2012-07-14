@@ -21,6 +21,7 @@
  *     e      e    a
  *
  *  TODO: Make all structures immutable. Specifically, change ArrayBuffer into List if possible.
+ *  TODO: Convert to HashMaps instead of ArrayBuffers! More efficient lookup
  */
 
 import collection.mutable.ArrayBuffer
