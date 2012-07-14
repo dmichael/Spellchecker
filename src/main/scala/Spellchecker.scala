@@ -25,15 +25,11 @@
 
 import collection.mutable.HashMap
 
-// It seems hard to define a self-referencing HashMap without some sort of wrapper
-class Node(val children: HashMap[Char, Node] = HashMap.empty[Char, Node])
-
-
 object Spellchecker {
     val dictionary = new Node()
 
     def buildDictionary(words: Array[String]) {
-        words.foreach(word => fill(dictionary, word))
+        words.foreach( fill(dictionary, _) )
     }
 
     /**
@@ -67,3 +63,6 @@ class Spellchecker {
         }
     }
 }
+
+// It seems hard to define a self-referencing HashMap without some sort of wrapper
+class Node(val children: HashMap[Char, Node] = HashMap.empty[Char, Node])
